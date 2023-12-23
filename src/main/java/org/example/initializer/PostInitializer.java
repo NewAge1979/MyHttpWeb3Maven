@@ -7,7 +7,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletContext;
-import java.util.Arrays;
 
 public class PostInitializer implements WebApplicationInitializer {
     private static final Logger myLogger = LogManager.getLogger(PostInitializer.class);
@@ -17,7 +16,6 @@ public class PostInitializer implements WebApplicationInitializer {
         final var context = new AnnotationConfigWebApplicationContext();
         context.scan("org.example");
         context.refresh();
-        System.out.println(Arrays.toString(context.getBeanDefinitionNames()));
 
         final var servlet = new DispatcherServlet(context);
         final var registration = servletContext.addServlet("app", servlet);
