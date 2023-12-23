@@ -18,19 +18,23 @@ public class PostRepositoryImpl implements PostRepository{
     private final static AtomicLong lastId = new AtomicLong(0);
 
     public List<Post> all() {
-        return allPosts.values().stream().toList();
+        return allPosts.values().stream().filter(x->!x.isRemoved()).toList();
     }
 
     public Optional<Post> getById(long id) {
-        return Optional.ofNullable(allPosts.get(id));
+        return allPosts.values().stream()
+                        .filter(x->!x.isRemoved())
+                        .filter(x->x.getId() == id)
+                        .findFirst();
     }
 
     public Post save(Post post) {
         var id = post.getId();
-        if (id == 0 || allPosts.get(id) != null) {
+        if (id == 0 || getById(id).isPresent()) {
             if (id == 0) {
                 id = lastId.incrementAndGet();
                 post.setId(id);
+                post.setRemoved(false);
             }
             allPosts.put(id, post);
             myLogger.info(String.format("Add/Edit post: %d", id));
@@ -41,8 +45,8 @@ public class PostRepositoryImpl implements PostRepository{
     }
 
     public void removeById(long id) {
-        if (allPosts.get(id) != null) {
-            allPosts.remove(id);
+        if (getById(id).isPresent()) {
+            allPosts.get(id).setRemoved(true);
             myLogger.info(String.format("Delete post: %d", id));
         } else {
             throw new NotFoundException();
